@@ -7,6 +7,14 @@ loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const correo = loginForm["correo"];
   const contraseña = loginForm["contraseña"];
+  if(!correo?.value.trim() || !contraseña?.value.trim()){
+    await Swal.fire({
+        title: "Error",
+        text: "Correo y contraseña son obligatorios",
+        icon: "error"
+    });
+    return;
+}
   try {
     await loginUsusario(correo.value, contraseña.value);
     await Swal.fire({
@@ -35,6 +43,14 @@ loginForm.addEventListener("submit", async (e) => {
 recuperar.addEventListener("submit", async (e) => {
   e.preventDefault();
   const correo = recuperar["correo"].value;
+  if(!correo?.trim()){
+    await Swal.fire({
+        title: "Error",
+        text: "El correo es obligatorio",
+        icon: "error"
+    });
+    return;
+}
   try {
     await recuperarContraseña(correo);
     await Swal.fire({

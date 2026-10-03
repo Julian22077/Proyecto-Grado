@@ -9,6 +9,14 @@ registroForm.addEventListener("submit", async (e) => {
   const cedula = registroForm["cedula"];
   const placa = registroForm["placa"];
   const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_\\-])[A-Za-z\d@$!%*?&.#_-]{8,30}$/;
+  if(!nombre?.value.trim() || !correo?.value.trim() || !contrasena?.value.trim() || !cedula?.value.trim() || !placa?.value.trim()){
+        await Swal.fire({
+            title: "Error",
+            text: "Todos los campos son obligatorios",
+            icon: "error"
+        });
+        return;
+    }
 if (!regexPassword.test(contrasena.value)) {
     await Swal.fire({
         icon: "error",

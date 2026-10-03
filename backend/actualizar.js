@@ -1,4 +1,4 @@
-import { ongetUsuario, updateUsusario, auth } from "./firebase.js";
+import { updateUsusario, auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 onAuthStateChanged(auth, async (usuarioAuth) => {
     if (!usuarioAuth) {

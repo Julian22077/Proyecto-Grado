@@ -30,13 +30,18 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const addUsuario = async (nombre, correo, contraseña, cedula, placa) => {
+    if(!nombre?.trim() || !correo?.trim() || !contraseña?.trim() || !cedula?.trim() || !placa?.trim()){
+        throw new Error("Todos los campos son obligatorios");
+    }
     const userCredential = await createUserWithEmailAndPassword(auth, correo, contraseña);
     const user = userCredential.user;
     await updateProfile(user, { displayName: nombre });
     await setDoc(doc(db, "usuarios", user.uid), { nombre, correo, cedula, placa });
-    await setDoc(doc(db, "automoviles", user.uid), { nombre, placa });
 };
 export const loginUsusario = async (correo, contraseña) => {
+    if(!correo?.trim() || !contraseña?.trim()){
+        throw new Error("Correo y contraseña son obligatorios");
+    }
     await signInWithEmailAndPassword(auth, correo, contraseña);
 };
 export const logoutUsuario = async () => {
@@ -49,13 +54,14 @@ export const getUsuario = (uid) => getDoc(doc(db, 'usuarios', uid));
 export const updateUsusario = async (uid, newFields) => {
     await updateProfile(auth.currentUser, { displayName: newFields.nombre });
     await updateDoc(doc(db, "usuarios", uid), newFields);
-    await updateDoc(doc(db, "automoviles", uid), { nombre: newFields.nombre, placa: newFields.placa });
 };
 export const crearParqueaderos = async (espaciosReserva) => {
+    const operaciones = [];
     for (let i = 1; i <= 100; i++) {
         const tipo = i <= espaciosReserva ? "reserva" : "comun";
         await setDoc(doc(db, "parqueaderos", i.toString()), { numero: i, tipo });
     }
+    await Promise.all(operaciones);
 };
 export const obtenerTotalParqueaderos = async () => {
     const snap = await getDocs(collection(db, "parqueaderos"));

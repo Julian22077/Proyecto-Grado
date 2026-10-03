@@ -1,4 +1,4 @@
-import { auth, obtenerReserva,obtenerEstado, NotificarUsuario, cancelarNotificacion, obtenertokenFCM } from "./firebase.js";
+import { auth, obtenerEstado, NotificarUsuario,obtenertokenFCM } from "./firebase.js";
 import { iniciarContador } from "./contador.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 

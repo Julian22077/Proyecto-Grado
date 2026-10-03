@@ -1,4 +1,4 @@
-import { auth, getUsuario, obtenerReservasAdmin, obtenerTotalParqueaderos, ultimasreservas, obtenerEstado, obtenerUsuarios, obetenerconfig, obtenerUsosAdmin } from "./firebase.js";
+import { auth, obtenerEstado } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 const adminContainer = document.getElementById("adminContainer");
 const cuentasContainer = document.getElementById("cuentas");

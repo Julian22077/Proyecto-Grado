@@ -1,4 +1,4 @@
-import { crearParqueaderos, obtenerTotalParqueaderos, actualizarParqueaderos, reservasVigentes, auth } from "./firebase.js";
+import { auth } from "./firebase.js";
 const inputReserva = document.getElementById("espaciosReserva");
 const spanComunes = document.getElementById("espaciosComunes");
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";

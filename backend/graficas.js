@@ -1,4 +1,4 @@
-import { ObtenerReservasA, auth, obtenerEstado, obetenerconfig, ObtenerUsosA } from "./firebase.js";
+import {  auth, obtenerEstado } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { convertirHora, convertirHoracomun } from "./utils.js";
 onAuthStateChanged(auth, async (usuarioAuth) => {
