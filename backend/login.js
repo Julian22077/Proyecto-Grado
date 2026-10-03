@@ -37,11 +37,19 @@ recuperar.addEventListener("submit", async (e) => {
   const correo = recuperar["correo"].value;
   try {
     await recuperarContraseña(correo);
-    alert("Se ha enviado un eamil para recuperar contraseña");
+    await Swal.fire({
+      tiitle: "Correo enviado",
+      text: "Se ha enviado un correo para restablecer la contraseña",
+      icon: "success",
+    })
     recuperar.reset();
   } catch (error) {
     console.error(error);
-    alert(error.message);
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message
+    });
   }
 })
 onAuthStateChanged(auth, (usuario) => {

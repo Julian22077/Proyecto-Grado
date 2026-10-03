@@ -101,9 +101,15 @@
   document.addEventListener(
     "submit",
     function (e) {
+      const formularioImprimir = e.target.closest('form[id^="imprimir-"]');
+
+        if (formularioImprimir) {
+            return;
+        }
       window.mostrarCarga(messageFor(e.target.querySelector('[type="submit"]') || e.target));
     },
     true
+    
   );
 
   document.addEventListener(
@@ -137,7 +143,11 @@
         }, 0);
         return;
       }
+      const formularioImprimir = btn.closest('form[id^="imprimir-"]');
 
+if (formularioImprimir) {
+    return;
+}
       if (isActionButton(btn) || /\breserr|\breserrr|\breserrrr\b/.test(btn.className || "")) {
         window.mostrarCarga(messageFor(btn));
       }
@@ -149,6 +159,13 @@
   const observer = new MutationObserver(function () {
     if (document.querySelector(".swal2-container")) {
       window.ocultarCarga();
+    }
+    const wompiAbierto = document.querySelector(
+        'iframe[src*="wompi"]'
+    );
+
+    if (wompiAbierto) {
+        window.ocultarCarga();
     }
   });
 

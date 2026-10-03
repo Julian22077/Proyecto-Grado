@@ -934,7 +934,7 @@ inputt.addEventListener("change", () => {
     diaComparacion1.innerHTML = htmlComparacionIngre
 
 });
-boton.addEventListener("click", () => {
+boton.addEventListener("click", async () => {
     const inicio = document.getElementById("fechaInicio").value;
     const fin = document.getElementById("fechaFin").value;
     const conteo = {}
@@ -969,11 +969,19 @@ boton.addEventListener("click", () => {
     });
 
     if (Object.keys(conteo).length == 0) {
-        alert("no hay reservas")
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No hay datos disponibles para el rango de fechas seleccionado.',
+        });
         return;
     }
     if (Object.keys(conteo1).length == 0) {
-        alert("no hay reservas")
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No hay datos disponibles para el rango de fechas seleccionado.',
+        });
         return;
     }
     const labels = Object.keys(conteo);

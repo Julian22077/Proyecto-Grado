@@ -1,14 +1,18 @@
-import express, { raw } from "express";
+import express from "express";
 import crypto from "crypto"
 import { getAuth } from "firebase-admin/auth"
 import dotenv from "dotenv";
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { initializeApp, applicationDefault } from "firebase-admin/app";
-import { convertirHora, hayConflicto, minutosAHora, generarPlaca, convertirHoracomun } from "../backend/utils.js";
+import { convertirHora, hayConflicto, minutosAHora,convertirHoracomun } from "../backend/utils.js";
 import { getFirestore } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+import multer from "multer"
 const app = express();
+const upload = multer({
+    storage: multer.memoryStorage()
+});
 const limite = rateLimit({
     windowMs: 60 * 1000,
     max: 60,
@@ -315,7 +319,6 @@ app.post("/hacerreserva", verficarUsuario, limite, async (req, res) => {
 
 app.post("/validaraumento", verficarUsuario, limite, async (req, res) => {
     try {
-        const uid = req.uid;
         const { reservaID, minutosExtra } = req.body
         if (!reservaID || !minutosExtra) {
             return res.status(400).json({ error: "faltan dattos" })
@@ -500,6 +503,9 @@ app.post("/penalizar", verficarUsuario, limite, async (req, res) => {
             if (minutosactuales < entrada) {
                 throw new Error("La reserva aun no ha empezado")
             }
+            if (minutosactuales === entrada) {
+                throw new Error("No puede salir a la misma hora de entrada")
+            }
             const minutospasados = minutosactuales - salida;
             const minutoscobrables = minutospasados - 5;
             if (minutospasados > 5) {
@@ -587,6 +593,14 @@ app.post("/gestionarcola", verficarUsuario, limite, async (req, res) => {
             const disponibleinicio = minutos;
             const disponiblefinal = siguientereserva;
             if (disponiblefinal <= disponibleinicio) {
+                if (minutos >= cierre) {
+                    const colab = db.collection("colaespera").where("fecha", "==", fecha).where("estado", "==", "espera");
+                    const colabo = await trans.get(colab);
+                    for (const personas of colabo.docs) {
+                        trans.delete(personas.ref);
+                    }
+                    return { message: "cola de espera liberada" }
+                }
                 return null;
             }
             const cola = db.collection("colaespera").where("fecha", "==", fecha).where("estado", "==", "espera").orderBy("creado", "asc").limit(1)
@@ -628,6 +642,14 @@ const gestionarcola = async (fecha, parqueaderoId) => {
         const disponibleinicio = minutos;
         const disponiblefinal = siguientereserva;
         if (disponiblefinal <= disponibleinicio) {
+            if (minutos >= cierre) {
+                const colab = db.collection("colaespera").where("fecha", "==", fecha).where("estado", "==", "espera");
+                const colabo = await trans.get(colab);
+                for (const personas of colabo.docs) {
+                    trans.delete(personas.ref);
+                }
+                return { message: "cola de espera liberada" }
+            }
             return null;
         }
         const cola = db.collection("colaespera").where("fecha", "==", fecha).where("estado", "==", "espera").orderBy("creado", "asc").limit(1)
@@ -680,11 +702,24 @@ app.post("/validarusocomun", verficarUsuario, limite, async (req, res) => {
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
+        const {placa}=req.body
+        if(!placa){
+           return res.status(400).json({error:"faltan datos"})
+        }
+         if (!/^[A-Z]{3}[0-9]{3}$/.test(placa)) {
+            return res.status(400).json({error: "La placa no tiene un formato valido"});
+        }
         const resultado = await db.runTransaction(async (transaccion) => {
             const parqueaderos = db.collection("parqueaderos").where("tipo", "==", "comun")
             const parqueadeross = await transaccion.get(parqueaderos);
             const comunes = db.collection("usocomun").where("estado", "==", "activo")
             const comunesactivos = await transaccion.get(comunes);
+            for (const comun of comunesactivos.docs) {
+                    const data = comun.data();
+                    if(data.placa===placa){
+                         throw new Error("La placa ya tiene una asignación activa");
+                    }
+                }
             if (parqueadeross.empty) {
                 throw new Error("No hay parqueaderos comunes")
             }
@@ -710,7 +745,7 @@ app.post("/validarusocomun", verficarUsuario, limite, async (req, res) => {
             const fechahoy = ahora.toLocaleDateString("sv-SE");
             const horaEntrada = ahora.toLocaleTimeString("sv-SE")
             const referencia = db.collection("usocomun").doc()
-            transaccion.create(referencia, { placa: generarPlaca(), parqueaderoId: espaciosdisponible, fecha: fechahoy, horaEntrada: horaEntrada, horaSalida: "", precio: 0, estado: "activo", creado: new Date(), pago: false, metodoPago: "" })
+            transaccion.create(referencia, { placa: placa, parqueaderoId: espaciosdisponible, fecha: fechahoy, horaEntrada: horaEntrada, horaSalida: "", precio: 0, estado: "activo", creado: new Date(), pago: false, metodoPago: "" })
             return { message: "la asiganción se creo" }
 
         })
@@ -863,7 +898,7 @@ app.get("/usuarios", verficarUsuario, limite, async (req, res) => {
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const usuarios = await db.collection("usuarios").where("correo","!=","julian.lozanoh@uniagustiniana.edu.co").get();
+        const usuarios = await db.collection("usuarios").where("correo", "!=", "julian.lozanoh@uniagustiniana.edu.co").get();
         return res.json({ total: usuarios.size })
     } catch (error) {
         return res.status(500).json({ error: error.message })
@@ -935,7 +970,17 @@ const NotificarFirebase = async (uid, titulo, mensaje) => {
             body: mensaje
         }
     }));
-    await messaging.sendEach(mensajes);
+    const respuesta = await messaging.sendEach(mensajes);
+    for (let i = 0; i < respuesta.responses.length; i++) {
+        const resultado = respuesta.responses[i];
+        if (!resultado.success) {
+            const error = resultado.error;
+            if (error.code === "messaging/registration-token-not-registered" || error.code === "messaging/invalid-registration-token") {
+                const tokenInvalido = tokens[i];
+                await db.collection("usuarios").doc(uid).collection("fcmtokens").doc(tokenInvalido).delete();
+            }
+        }
+    }
 }
 export const obtenerEstado = (fecha, horaEntrada, horaSalida, finalizadaAntes) => {
     const ahora = new Date()
@@ -1058,53 +1103,53 @@ app.post("/crearconfiguracion", verficarUsuario, limite, async (req, res) => {
     } catch (error) {
         return res.status(500).json({ error: error.message })
     }
-})  
-app.get("/usuariostotales",verficarUsuario,limite,async(req,res)=>{
-    try{
+})
+app.get("/usuariostotales", verficarUsuario, limite, async (req, res) => {
+    try {
         const email = req.email;
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const usuarios=await db.collection("usuarios").where("correo","!=","julian.lozanoh@uniagustiniana.edu.co").get()
+        const usuarios = await db.collection("usuarios").where("correo", "!=", "julian.lozanoh@uniagustiniana.edu.co").get()
         return res.json(usuarios.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
 
-    }catch(error){
-        return res.status(500).json({error:error.message})
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 })
-app.get("/usuarios/:id", verficarUsuario,limite, async(req,res)=>{
-    try{
+app.get("/usuarios/:id", verficarUsuario, limite, async (req, res) => {
+    try {
         const email = req.email;
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const usuario=await db.collection("usuarios").doc(req.params.id).get()
-        if(!usuario.exists){
-            return res.status(400).json({error:"usuario no encontrado"})
+        const usuario = await db.collection("usuarios").doc(req.params.id).get()
+        if (!usuario.exists) {
+            return res.status(400).json({ error: "usuario no encontrado" })
         }
-        return res.json({id:usuario.id,...usuario.data()})
-    }catch(error){
-        return res.status(500).json({error:error.message})
+        return res.json({ id: usuario.id, ...usuario.data() })
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 })
-app.get("/detalleusuario",verficarUsuario,limite,async(req,res)=>{
-    try{
-        const uid=req.uid;
-        const usuario=await db.collection("usuarios").doc(uid).get()
-        if(!usuario.exists){
-            return res.status(400).json({error:"no se encontro el usuario"})
+app.get("/detalleusuario", verficarUsuario, limite, async (req, res) => {
+    try {
+        const uid = req.uid;
+        const usuario = await db.collection("usuarios").doc(uid).get()
+        if (!usuario.exists) {
+            return res.status(400).json({ error: "no se encontro el usuario" })
         }
-        return res.json({id:usuario.id, ...usuario.data()})
-    }catch(error){
-        return res.status(500).json({error:error.message})
+        return res.json({ id: usuario.id, ...usuario.data() })
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 })
-app.get("/parqueaderoreservas",verficarUsuario,limite,async(req,res)=>{
-    try{
-        const parqueaderos = await db.collection("parqueaderos").where("tipo","==","reserva").get();
+app.get("/parqueaderoreservas", verficarUsuario, limite, async (req, res) => {
+    try {
+        const parqueaderos = await db.collection("parqueaderos").where("tipo", "==", "reserva").get();
         return res.json({ total: parqueaderos.size })
-    }catch(error){
-        return res.status(500).json({error:error.message})
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 })
 app.get("/reservausuarios", verficarUsuario, limite, async (req, res) => {
@@ -1117,18 +1162,130 @@ app.get("/reservausuarios", verficarUsuario, limite, async (req, res) => {
         return res.status(500).json({ error: error.message })
     }
 })
-app.get("/parqueaderoreservasadmin",verficarUsuario,limite,async(req,res)=>{
-    try{
+app.get("/parqueaderoreservasadmin", verficarUsuario, limite, async (req, res) => {
+    try {
         const email = req.email;
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const parqueaderos = await db.collection("parqueaderos").where("tipo","==","reserva").get();
+        const parqueaderos = await db.collection("parqueaderos").where("tipo", "==", "reserva").get();
         return res.json({ total: parqueaderos.size })
-    }catch(error){
-        return res.status(500).json({error:error.message})
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 })
+app.post("/detectar", verficarUsuario, upload.single("imagen"), async (req, res) => {
+    try {
+        const email = req.email;
+        if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
+            return res.status(403).json("No posee los permisos para hacer esta accion")
+        }
+        if (!req.file) {
+            res.status(400).json({ error: " no  hay imagen" })
+        }
+        const formData = new FormData()
+        formData.append("file", new Blob([req.file.buffer]), req.file.originalname)
+        const respuesta = await fetch("https://familia-tp410ua.tail727a50.ts.net/detectar", {
+            method: "POST",
+            body: formData
+        })
+        if (!respuesta.ok) {
+            const errorPython = await respuesta.text();
+            console.error("Error del servidor Python:", errorPython);
+            return res.status(500).json({ error: "El servicio de reconocimiento falló" });
+        }
+        const resultado = await respuesta.json();
+        const placa = resultado.placa;
+        if (!placa) {
+            return null;
+        }
+        const asignacion = await db.runTransaction(async (transaccion) => {
+            const parqueaderosQuery = db
+                .collection("parqueaderos")
+                .where("tipo", "==", "comun");
+
+            const parqueaderosSnapshot = await transaccion.get(parqueaderosQuery);
+
+            if (parqueaderosSnapshot.empty) {
+                throw new Error("No hay parqueaderos comunes");
+            }
+            const usosQuery = db.collection("usocomun").where("estado", "==", "activo");
+
+            const usosSnapshot = await transaccion.get(usosQuery);
+            for (const uso of usosSnapshot.docs) {
+                const data = uso.data();
+                if (data.placa && data.placa.toUpperCase() === placa.toUpperCase()) {
+                    throw new Error(`La placa ${placa} ya tiene un uso común activo`);
+                }
+            }
+            let espacioDisponible = null;
+            for (const parqueadero of parqueaderosSnapshot.docs) {
+                let disponible = true;
+                for (const uso of usosSnapshot.docs) {
+                    const data = uso.data();
+                    if (data.parqueaderoId === parqueadero.id) {
+                        disponible = false;
+                        break;
+                    }
+                }
+                if (disponible) {
+                    espacioDisponible = parqueadero.id;
+                    break;
+                }
+            }
+            if (!espacioDisponible) {
+                throw new Error("No hay espacios comunes disponibles");
+            }
+            const ahora = new Date();
+            const fecha = ahora.toLocaleDateString("sv-SE");
+            const horaEntrada = ahora.toLocaleTimeString("sv-SE");
+            const referencia = db.collection("usocomun").doc();
+            transaccion.create(referencia, { placa: placa.toUpperCase(), parqueaderoId: espacioDisponible, fecha: fecha, horaEntrada: horaEntrada, horaSalida: "", precio: 0, estado: "activo", creado: new Date(), pago: false, metodoPago: "" });
+            return {
+                id: referencia.id,
+                placa: placa.toUpperCase(),
+                parqueaderoId: espacioDisponible,
+                fecha: fecha,
+                horaEntrada: horaEntrada
+            };
+        });
+        return res.json(asignacion);
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
+    }
+})
+app.put("/actualizarplaca", verficarUsuario, async (req, res) => {
+    try {
+        const email = req.email;
+        if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
+            return res.status(403).json({error: "No posee los permisos para hacer esta accion"});
+        }
+        const { comunId, placa } = req.body;
+        if (!comunId || !placa) {
+            return res.status(400).json({ error: "Faltan datos"});
+        }
+        const nuevaPlaca = placa.trim().toUpperCase();
+        if (!/^[A-Z]{3}[0-9]{3}$/.test(nuevaPlaca)) {
+            return res.status(400).json({error: "La placa no tiene un formato valido"});
+        }
+        const referencia = db.collection("usocomun").doc(comunId);
+        const documento = await referencia.get();
+        if (!documento.exists) {
+            return res.status(404).json({error: "El uso común no existe"});
+        }
+        const datos = documento.data();
+        if(datos.estado ==="finalizado"){
+             return res.status(400).json({error: "La reserva ya finalizó"});
+        }
+        await referencia.update({
+            placa: nuevaPlaca
+        });
+        return res.json({message: "Placa actualizada correctamente"});
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({error: error.message});
+    }
+});
 app.listen(3000, () => {
     console.log("corriendo en el puerto")
 })

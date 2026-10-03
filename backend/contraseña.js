@@ -25,7 +25,11 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             return;
         }
         if (confirmar !== nueva) {
-            alert("las contraseñas con coinciden");
+            await Swal.fire({
+                icon: "error",
+                title: "Contraseñas no coinciden",
+                text: "La nueva contraseña y la confirmación no coinciden."
+            })
         } else {
             try {
                 await cambiarContraseña(actual, nueva);
