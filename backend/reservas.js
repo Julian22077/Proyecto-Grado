@@ -68,16 +68,13 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
           </div>
           <div class="reserva-card-actions">
             <p class="estado ${estado}">${estado}</p>
-            <form id="penalizar-${data.id}">
-              <button type="submit" class="reserrrr">Salió</button>
-            </form>
           </div>
         </header>
         <div class="reservas_admin_totales reserva-card-body">
           <div class="prim">
             <div class="fill">
-              <span class="reserva-meta-label">Costo Adicional</span>
-              <p class="reserva-meta-value">${data.costoAdicional||"-"}</p>
+              <span class="reserva-meta-label">Costo adicional</span>
+              <p class="reserva-meta-value">${data.costoAdicional||"—"}</p>
             </div>
             <div class="fill">
               <span class="reserva-meta-label">Fecha</span>
@@ -99,13 +96,25 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             </div>
             <div class="fill">
               <span class="reserva-meta-label">Minutos pasados</span>
-              <p class="reserva-meta-value">${data.minutosPasados||"-"}</p>
+              <p class="reserva-meta-value">${data.minutosPasados||"—"}</p>
             </div>
           </div>
         </div>
+        <footer class="reserva-card-actions">
+          <form id="penalizar-${data.id}">
+            <button type="submit" class="reserrrr">Salió</button>
+          </form>
+        </footer>
       </article>
             `;
     });
+    if (!html) {
+      html = `
+      <div class="dash-empty">
+        <p class="dash-empty-title">Sin reservas</p>
+        <p class="dash-empty-text">No hay resultados para mostrar en este momento.</p>
+      </div>`;
+    }
     reservasUsuariosContainer.innerHTML = html;
     lista.forEach((data) => {
       const penalizacion = document.getElementById(`penalizar-${data.id}`);

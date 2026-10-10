@@ -18,10 +18,10 @@
     el.innerHTML = `
       <div class="pantalla_carga_caja">
         <div class="pantalla_carga_anillo" aria-hidden="true">
-          <span class="pantalla_carga_p">P</span>
+          <img class="pantalla_carga_icono" src="assets/icono-calatrava.png" alt="">
         </div>
         <p class="pantalla_carga_texto">Procesando…</p>
-        <p class="pantalla_carga_sub">Parqueadero CJ</p>
+        <p class="pantalla_carga_sub">Calatrava Parqueadero</p>
       </div>
     `;
     document.body.appendChild(el);
@@ -47,12 +47,12 @@
     }, MAX_MS);
   };
 
-  window.ocultarCarga = function () {
+  window.ocultarCarga = function (inmediato) {
     const el = document.getElementById("pantallaCarga");
     if (!el || !el.classList.contains("activa")) return;
 
     const elapsed = Date.now() - shownAt;
-    const wait = Math.max(0, MIN_MS - elapsed);
+    const wait = inmediato ? 0 : Math.max(0, MIN_MS - elapsed);
 
     clearTimeout(hideTimer);
     hideTimer = setTimeout(function () {
@@ -101,6 +101,7 @@
   document.addEventListener(
     "submit",
     function (e) {
+      if (e.target.closest(".swal2-container")) return;
       const formularioImprimir = e.target.closest('form[id^="imprimir-"]');
 
         if (formularioImprimir) {
@@ -115,6 +116,7 @@
   document.addEventListener(
     "click",
     function (e) {
+      if (e.target.closest(".swal2-container")) return;
       const btn = e.target.closest(
         "button, a.boton_aumentar, #logout, #comun, .reserr, .reserrr, .reserrrr"
       );
@@ -158,7 +160,7 @@ if (formularioImprimir) {
   /* Ocultar cuando aparece SweetAlert o al terminar navegación */
   const observer = new MutationObserver(function () {
     if (document.querySelector(".swal2-container")) {
-      window.ocultarCarga();
+      window.ocultarCarga(true);
     }
     const wompiAbierto = document.querySelector(
         'iframe[src*="wompi"]'

@@ -64,7 +64,14 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
          ${placa}${correo}
        </div>
     </div>`
-  }) 
+  })
+  if (!html) {
+    html = `
+      <div class="dash-empty">
+        <p class="dash-empty-title">Sin usuarios</p>
+        <p class="dash-empty-text">No hay cuentas que coincidan con la búsqueda.</p>
+      </div>`;
+  }
   containerusuarios.innerHTML=html
 }
   MostrarUsuarios(usuarios);

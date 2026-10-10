@@ -1,36 +1,42 @@
 /* =========================================================
-   Parqueadero CJ — Control operativo
-   Sistema administrativo serio (shell + auth + paneles)
+   Calatrava Parqueadero — Control operativo
+   Paleta tomada del isotipo: naranja cálido y carbón
    ========================================================= */
 
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --ink: #0c1117;
-  --ink-2: #161d27;
-  --ink-3: #243041;
-  --steel: #5b8fa8;
-  --steel-2: #7aadc2;
-  --steel-dim: rgba(91, 143, 168, 0.14);
-  --paper: #e9edf1;
-  --panel: #ffffff;
-  --line: #d3dae3;
-  --line-strong: #b8c2cf;
-  --muted: #5f6b7a;
-  --text: #15202b;
-  --ok: #1b7a45;
-  --ok-bg: #e8f6ee;
-  --warn: #9a6700;
-  --warn-bg: #fff6e0;
-  --bad: #b42318;
-  --bad-bg: #fdeceb;
-  --shadow: 0 1px 2px rgba(12, 17, 23, 0.04), 0 8px 24px rgba(12, 17, 23, 0.06);
-  --radius: 10px;
-  --sidebar: 248px;
-  --topbar: 64px;
-  --font: "Manrope", system-ui, sans-serif;
+  color-scheme: dark;
+  --ink: #e7eef4;
+  --ink-2: #d5e0e8;
+  --ink-3: #b7c6d3;
+  --steel: #e08a4a;
+  --steel-2: #f0b27a;
+  --steel-dim: rgba(224, 138, 74, 0.18);
+  --paper: #101820;
+  --panel: #1a2632;
+  --line: #2c3d4c;
+  --line-strong: #3d5366;
+  --muted: #93a6b6;
+  --text: #e7eef4;
+  --ok: #8ed4a8;
+  --ok-bg: #163528;
+  --warn: #e6c07b;
+  --warn-bg: #3a2e14;
+  --bad: #f0b0ac;
+  --bad-bg: #3d1e1e;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 16px 36px rgba(0, 0, 0, 0.28);
+  --radius: 14px;
+  --sidebar: 256px;
+  --topbar: 68px;
+  --font: "Source Sans 3", "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
-  --ease: 0.18s ease;
+  --ease: 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+  --nav: #0c141c;
+  --field: #14202b;
+  --btn: #e08a4a;
+  --btn-hover: #c96f32;
+  --on-btn: #1c120c;
 }
 
 *,
@@ -56,6 +62,9 @@ body.app {
   display: grid;
   grid-template-columns: var(--sidebar) 1fr;
   min-height: 100vh;
+  background:
+    radial-gradient(ellipse 50% 32% at 100% 0%, rgba(200, 90, 36, 0.08), transparent 58%),
+    linear-gradient(180deg, #eef3f7 0%, var(--paper) 220px);
 }
 
 a {
@@ -86,7 +95,7 @@ img {
   z-index: 10000;
   display: grid;
   place-items: center;
-  background: rgba(12, 17, 23, 0.72);
+  background: rgba(12, 24, 34, 0.62);
   backdrop-filter: blur(8px);
   opacity: 0;
   visibility: hidden;
@@ -106,23 +115,35 @@ img {
 }
 
 .pantalla_carga_anillo {
-  width: 56px;
-  height: 56px;
+  width: 92px;
+  height: 92px;
   margin: 0 auto 16px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.16);
   border-top-color: var(--steel);
-  animation: spin 0.75s linear infinite;
+  animation: spin 0.9s linear infinite;
   display: grid;
   place-items: center;
+  background: #f7f4f0;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.pantalla_carga_icono,
+.pantalla_carga_p {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border-radius: 12px;
+  animation: spin-rev 0.9s linear infinite;
 }
 
 .pantalla_carga_p {
+  width: auto;
+  height: auto;
   font-family: var(--mono);
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--steel-2);
-  animation: spin-rev 0.75s linear infinite;
+  color: var(--steel);
 }
 
 .pantalla_carga_texto {
@@ -160,13 +181,15 @@ body.cargando {
   position: sticky;
   top: 0;
   height: 100vh;
-  background: linear-gradient(180deg, var(--ink) 0%, #080b10 100%);
-  color: #c5ced8;
+  background:
+    linear-gradient(180deg, rgba(200, 90, 36, 0.16), transparent 140px),
+    linear-gradient(180deg, #152838 0%, var(--nav) 42%, #0c1620 100%);
+  color: #c5d3de;
   display: flex;
   flex-direction: column;
   padding: 0;
   z-index: 50;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .lista {
@@ -215,6 +238,16 @@ body.cargando {
   fill: currentColor !important;
 }
 
+.logo img.icono {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 12px;
+  background: #f7f4f0;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(224, 122, 61, 0.45);
+}
+
 .logo .oculto {
   display: flex;
   flex-direction: column;
@@ -225,7 +258,7 @@ body.cargando {
 }
 
 .logo .oculto::after {
-  content: "Control operativo";
+  content: "Parqueadero";
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -262,8 +295,13 @@ body.cargando {
 
 .elemento:hover,
 .elemento.activo {
-  background: rgba(91, 143, 168, 0.12);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
+}
+
+.elemento.activo {
+  background: rgba(200, 90, 36, 0.18);
+  box-shadow: inset 3px 0 0 var(--steel);
 }
 
 .elemento:hover svg,
@@ -294,9 +332,10 @@ body.cargando {
   justify-content: space-between;
   gap: 16px;
   padding: 0 28px;
-  background: rgba(233, 237, 241, 0.88);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
+  box-shadow: none;
 }
 
 .topbar-kicker {
@@ -333,7 +372,7 @@ body.cargando {
 .contenido_reservas,
 .reservar {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 24px 28px 48px;
 }
@@ -348,19 +387,29 @@ body.cargando {
 
 /* ---------- Auth (login / registro / recuperar) ---------- */
 body.auth {
-  display: block;
+  display: grid;
+  place-items: center;
   min-height: 100vh;
-  background: var(--ink);
+  padding: 28px 16px;
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgba(200, 90, 36, 0.16), transparent 55%),
+    radial-gradient(ellipse 40% 40% at 100% 100%, rgba(23, 48, 65, 0.14), transparent 50%),
+    #d5e1ea;
 }
 
 .registro {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  min-height: 100vh;
-  width: 100%;
+  grid-template-columns: 0.92fr 1.08fr;
+  min-height: min(680px, calc(100vh - 56px));
+  width: min(980px, 100%);
   margin: 0;
   padding: 0;
-  background: transparent;
+  background: var(--panel);
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 28px 70px rgba(16, 36, 52, 0.16);
+  animation: cal-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .auth-brand,
@@ -368,14 +417,14 @@ body.auth {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 20% 10%, rgba(91, 143, 168, 0.22), transparent 50%),
-    linear-gradient(160deg, #0c1117 0%, #121a24 55%, #0a0e14 100%);
+    radial-gradient(ellipse at 18% 0%, rgba(200, 90, 36, 0.32), transparent 48%),
+    linear-gradient(180deg, #1b3346 0%, #10202d 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 48px;
-  min-height: 100vh;
+  padding: 40px 36px;
+  min-height: 100%;
 }
 
 .auth-brand::before,
@@ -393,25 +442,20 @@ body.auth {
 
 .auth-brand::after,
 .imagen::after {
-  content: "P";
+  content: "";
   position: absolute;
   right: 8%;
-  top: 18%;
-  width: 160px;
-  height: 200px;
-  border: 3px solid rgba(91, 143, 168, 0.45);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-family: var(--mono);
-  font-size: 5rem;
-  font-weight: 600;
-  color: rgba(91, 143, 168, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  top: 12%;
+  width: 180px;
+  height: 180px;
+  border: none;
+  border-radius: 28px;
+  background: url("assets/icono-calatrava.png") center / cover no-repeat;
+  opacity: 0.22;
   pointer-events: none;
 }
 
-.imagen img {
+.imagen > img {
   display: none;
 }
 
@@ -423,12 +467,30 @@ body.auth {
 }
 
 .auth-mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  display: block;
   margin-bottom: 28px;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.auth-brand .auth-tagline,
+.imagen .auth-tagline {
+  margin: -12px 0 22px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.auth-mark img {
+  display: block;
+  width: min(300px, 100%);
+  height: auto;
+  background: #f7f4f0;
+  border-radius: 18px;
+  padding: 10px 14px 6px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
 }
 
 .auth-mark span {
@@ -466,10 +528,11 @@ body.auth {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 40px;
+  padding: 40px 36px;
   flex: 1;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
+  background: linear-gradient(180deg, #fbfcfd 0%, #f3f7fa 100%);
 }
 
 .campos_sec {
@@ -530,7 +593,7 @@ body.auth {
 #buscarUsuario {
   width: 100%;
   border: 1px solid var(--line);
-  background: #f7f9fb;
+  background: var(--field);
   border-radius: 8px;
   padding: 12px 14px;
   font-size: 0.95rem;
@@ -545,7 +608,7 @@ body.auth {
 .actualizar_datos input:focus,
 .contenido_ter input:focus {
   border-color: var(--steel);
-  background: #fff;
+  background: var(--panel);
   box-shadow: 0 0 0 3px var(--steel-dim);
 }
 
@@ -565,8 +628,8 @@ body.auth {
   font-weight: 700;
   font-size: 0.92rem;
   letter-spacing: 0.01em;
-  box-shadow: none;
-  transition: background var(--ease), transform var(--ease);
+  box-shadow: 0 8px 18px rgba(23, 48, 65, 0.16);
+  transition: background var(--ease), transform var(--ease), box-shadow var(--ease);
 }
 
 .reserr:hover,
@@ -576,7 +639,9 @@ body.auth {
 .actualizar_datos button:hover,
 .perfil button:hover,
 #comun:hover {
-  background: var(--ink-3);
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(23, 48, 65, 0.18);
 }
 
 .campos_sec > div > p,
@@ -682,7 +747,7 @@ body.auth #registroForm {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding: 14px;
-  background: #f4f7f9;
+  background: var(--field);
   border: 1px solid var(--line);
   border-radius: 8px;
   margin: 4px 0 8px;
@@ -722,7 +787,7 @@ body.auth #registroForm {
   padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f7f9fb;
+  background: var(--field);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -732,7 +797,7 @@ body.auth #registroForm {
 #espa_reser label:hover,
 #espa_reser > *:hover {
   border-color: var(--steel);
-  background: #fff;
+  background: var(--panel);
 }
 
 #espa_reser input[type="radio"] {
@@ -821,7 +886,7 @@ body.auth #registroForm {
 
 .derecha {
   margin: 0;
-  background: #f5f8fa;
+  background: var(--field);
   border: none;
   border-left: 1px solid var(--line);
   padding: 22px 20px;
@@ -873,7 +938,7 @@ body.auth #registroForm {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--ink);
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   text-align: center;
@@ -960,15 +1025,15 @@ body.auth #registroForm {
   align-items: flex-start;
   gap: 4px;
   padding: 12px 14px;
-  background: #f7f9fb;
+  background: var(--field);
   border: 1px solid var(--borde, var(--line));
   border-radius: 8px;
 }
 
 .mi-reserva-code {
   grid-column: 1 / -1;
-  background: var(--ink) !important;
-  border-color: var(--ink) !important;
+  background: #241910 !important;
+  border-color: rgba(212, 137, 74, 0.55) !important;
 }
 
 .mi-reserva-code .reserva-meta-label {
@@ -976,7 +1041,7 @@ body.auth #registroForm {
 }
 
 .mi-reserva-code .reserva-meta-value {
-  color: #fff;
+  color: var(--text);
   font-size: 1.15rem;
 }
 
@@ -1055,7 +1120,7 @@ body.auth #registroForm {
   text-align: left;
   gap: 10px;
   padding: 20px 18px 22px;
-  background: linear-gradient(180deg, #f3f7fa 0%, #eef3f7 100%);
+  background: var(--field);
 }
 
 .mi-aumento-panel .contador {
@@ -1106,7 +1171,7 @@ body.auth #registroForm {
   font-weight: 600;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--panel);
   color: var(--ink);
 }
 
@@ -1121,7 +1186,7 @@ body.auth #registroForm {
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -1259,7 +1324,7 @@ body.auth #registroForm {
   align-items: flex-start;
   gap: 4px;
   padding: 12px 14px;
-  background: #f7f9fb;
+  background: var(--field);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -1300,13 +1365,13 @@ body.auth #registroForm {
 }
 
 .cuenta-btn-secondary {
-  background: #fff;
+  background: var(--panel);
   color: var(--ink);
   border: 1px solid var(--line-strong);
 }
 
 .cuenta-btn-secondary:hover {
-  background: #f5f8fa;
+  background: var(--field);
   border-color: var(--ink);
   color: var(--ink);
 }
@@ -1326,8 +1391,8 @@ body.auth #registroForm {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(91, 143, 168, 0.16), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(12, 17, 23, 0.06), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(224, 122, 61, 0.16), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(46, 40, 34, 0.06), transparent 50%),
     var(--paper);
   font-family: var(--font);
   color: var(--text);
@@ -1515,7 +1580,7 @@ body.auth #registroForm {
 .grafica > .fila {
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
-  background: #f7f9fb;
+  background: var(--field);
 }
 
 .ultimas_reservas {
@@ -1528,7 +1593,7 @@ body.auth #registroForm {
 
 .dos_ultimas {
   padding: 14px;
-  background: #f7f9fb;
+  background: var(--field);
   box-shadow: none;
 }
 
@@ -1807,7 +1872,7 @@ body.auth #registroForm {
 .tarjeta_usuario:hover {
   transform: translateY(-1px);
   border-color: var(--ink);
-  background: #f7f9fb;
+  background: var(--field);
 }
 
 .usuario-card-text {
@@ -1923,16 +1988,16 @@ body.auth #registroForm {
   margin-bottom: 2px;
 }
 
-/* ---------- SweetAlert2 — tema Parqueadero CJ ---------- */
+/* ---------- SweetAlert2 — tema Calatrava ---------- */
 .swal2-container.cj-swal-container,
 .swal2-container {
-  z-index: 10000;
+  z-index: 20000 !important;
 }
 
 .swal2-container.swal2-backdrop-show,
 .swal2-container.swal2-shown {
-  background: rgba(12, 17, 23, 0.52) !important;
-  backdrop-filter: blur(2px);
+  background: rgba(12, 24, 34, 0.48) !important;
+  backdrop-filter: blur(6px);
 }
 
 .swal2-popup,
@@ -1942,27 +2007,27 @@ body.auth #registroForm {
   padding: 28px 26px 24px !important;
   background: var(--panel) !important;
   color: var(--text) !important;
-  border-radius: 10px !important;
+  border-radius: 18px !important;
   border: 1px solid var(--line) !important;
-  border-left: 3px solid var(--steel) !important;
-  box-shadow: 0 16px 48px rgba(12, 17, 23, 0.18) !important;
+  border-top: 3px solid var(--steel) !important;
+  box-shadow: 0 24px 60px rgba(12, 24, 34, 0.2) !important;
 }
 
 .swal2-popup.swal2-icon-success {
-  border-left-color: var(--ok) !important;
+  border-top-color: var(--ok) !important;
 }
 
 .swal2-popup.swal2-icon-error {
-  border-left-color: var(--bad) !important;
+  border-top-color: var(--bad) !important;
 }
 
 .swal2-popup.swal2-icon-warning {
-  border-left-color: var(--warn) !important;
+  border-top-color: var(--warn) !important;
 }
 
 .swal2-popup.swal2-icon-info,
 .swal2-popup.swal2-icon-question {
-  border-left-color: var(--steel) !important;
+  border-top-color: var(--steel) !important;
 }
 
 .swal2-title,
@@ -2036,14 +2101,14 @@ body.auth #registroForm {
 
 .swal2-cancel,
 .cj-swal-cancel {
-  background: #fff !important;
+  background: var(--panel) !important;
   color: var(--ink) !important;
   border: 1px solid var(--line-strong) !important;
 }
 
 .swal2-cancel:hover,
 .cj-swal-cancel:hover {
-  background: #f5f8fa !important;
+  background: var(--field) !important;
   border-color: var(--ink) !important;
   color: var(--ink) !important;
 }
@@ -2107,7 +2172,7 @@ body.auth #registroForm {
   font-family: var(--font) !important;
   font-size: 0.95rem !important;
   color: var(--text) !important;
-  background: #f7f9fb !important;
+  background: var(--field) !important;
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
   box-shadow: none !important;
@@ -2118,7 +2183,7 @@ body.auth #registroForm {
 .swal2-select:focus,
 .swal2-html-container select:focus {
   border-color: var(--steel) !important;
-  background: #fff !important;
+  background: var(--panel) !important;
   box-shadow: 0 0 0 3px var(--steel-dim) !important;
   outline: none !important;
 }
@@ -2291,7 +2356,7 @@ body:not(.app) .contenido {
   margin: 0;
   padding: 14px 16px;
   border-radius: 8px;
-  background: #f7f9fb;
+  background: var(--field);
   border: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 0.88rem;
@@ -2617,7 +2682,7 @@ body:not(.app) .contenido {
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
-  background: #f7f9fb;
+  background: var(--field);
 }
 
 .panel-head .titulo-general {
@@ -2678,7 +2743,7 @@ body:not(.app) .contenido {
   flex-direction: column;
   gap: 12px;
   padding: 14px;
-  background: #f7f9fb;
+  background: var(--field);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: none;
@@ -2696,8 +2761,8 @@ body:not(.app) .contenido {
   align-items: center;
   padding: 4px 10px;
   border-radius: 6px;
-  background: var(--ink);
-  color: #fff;
+  background: #2c2118;
+  color: var(--steel-2);
   font-family: var(--mono);
   font-size: 0.72rem;
   font-weight: 600;
@@ -2718,7 +2783,7 @@ body:not(.app) .contenido {
 }
 
 .reserva-meta div {
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 12px;
@@ -2747,7 +2812,7 @@ body:not(.app) .contenido {
   text-align: center;
   border: 1px dashed var(--line);
   border-radius: 8px;
-  background: #fafbfc;
+  background: var(--panel);
 }
 
 .dash-empty-title {
@@ -2891,7 +2956,7 @@ body:not(.app) .contenido {
   box-shadow: none;
   border-radius: 0;
   border-bottom: 1px solid var(--line);
-  background: #f7f9fb;
+  background: var(--field);
 }
 
 .stats-range-charts {
@@ -2919,7 +2984,7 @@ body:not(.app) .contenido {
 }
 
 .stats-btn-secondary {
-  background: #fff !important;
+  background: var(--panel) !important;
   color: var(--ink) !important;
   border: 1px solid var(--line) !important;
   box-shadow: none !important;
@@ -2954,7 +3019,7 @@ body:not(.app) .contenido {
 
 /* ---------- Reservas admin (grid 2 columnas) ---------- */
 .reservas-page {
-  max-width: 1120px;
+  max-width: 1480px;
 }
 
 .reservas-page .contenido_reservas {
@@ -2995,7 +3060,7 @@ body:not(.app) .contenido {
   margin: 0;
   padding: 14px 16px;
   border-bottom: 1px solid var(--borde);
-  background: #f7f9fb;
+  background: var(--field);
   flex-wrap: wrap;
 }
 
@@ -3012,8 +3077,9 @@ body:not(.app) .contenido {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  background: var(--ink);
+  background: #2c2118;
   color: var(--steel-2);
+  border: 1px solid rgba(212, 137, 74, 0.45);
   font-family: var(--mono);
   font-weight: 600;
   font-size: 1rem;
@@ -3048,6 +3114,13 @@ body:not(.app) .contenido {
 
 .reserva-card-actions form {
   margin: 0;
+}
+
+footer.reserva-card-actions {
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--field);
 }
 
 .reserva-card-actions .reserrrr {
@@ -3087,7 +3160,7 @@ body:not(.app) .contenido {
   border: 1px solid var(--borde);
   border-radius: 8px;
   padding: 10px 12px;
-  background: #f7f9fb;
+  background: var(--field);
   border-bottom: 1px solid var(--borde);
 }
 
@@ -3157,7 +3230,7 @@ body:not(.app) .contenido {
   padding: 14px;
   border: 1px solid var(--borde);
   border-radius: 10px;
-  background: #f7f9fb;
+  background: var(--field);
   margin: 4px 0 8px;
 }
 
@@ -3202,7 +3275,7 @@ body:not(.app) .contenido {
   padding: 12px 14px 12px 28px;
   border: 1px solid var(--borde);
   border-radius: 10px;
-  background: #fff;
+  background: var(--panel);
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.45;
@@ -3263,4 +3336,482 @@ body:not(.app) .contenido {
   background: none;
   padding: 0;
   cursor: pointer;
+}
+
+/* ---------- Menú agrupado y movimiento ---------- */
+.menu-cuerpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 0 12px;
+}
+
+.menu-bloque + .menu-bloque {
+  margin-top: 6px;
+}
+
+.menu-grupo {
+  margin: 12px 18px 6px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(197, 211, 222, 0.55);
+}
+
+.menu-cuerpo .lista {
+  flex: 0 0 auto;
+  padding: 0 12px 4px;
+}
+
+.lista > li:last-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.lista-salir {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 8px 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.elemento {
+  transition: background var(--ease), color var(--ease), transform var(--ease);
+}
+
+.elemento:hover {
+  transform: translateX(2px);
+}
+
+.topbar-title,
+.topbar-kicker {
+  animation: cal-fade 0.4s ease both;
+}
+
+.app-main .contenido,
+.app-main .contenido_usuarios,
+.app-main .contenido_reservas,
+.app-main .reservar,
+.app-main .contenido_usuario,
+.cuenta-edit,
+.cuenta-page .contenido_usuario {
+  animation: cal-rise 0.48s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.kpi,
+.panel,
+.ultimas-container,
+.grafica,
+.reserva-card,
+.tarjeta_usuario,
+.cuenta-form-card,
+.stats-card,
+.buscador {
+  animation: cal-rise 0.46s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.informacion_admin .kpi:nth-child(2) { animation-delay: 0.05s; }
+.informacion_admin .kpi:nth-child(3) { animation-delay: 0.1s; }
+.informacion_admin .kpi:nth-child(4) { animation-delay: 0.15s; }
+
+.reservas-grid .reserva-card:nth-child(2),
+.usuarios-grid .tarjeta_usuario:nth-child(2) { animation-delay: 0.04s; }
+.reservas-grid .reserva-card:nth-child(3),
+.usuarios-grid .tarjeta_usuario:nth-child(3) { animation-delay: 0.08s; }
+.reservas-grid .reserva-card:nth-child(4),
+.usuarios-grid .tarjeta_usuario:nth-child(4) { animation-delay: 0.12s; }
+
+body.auth .campos_sec {
+  animation: cal-fade 0.45s ease 0.08s both;
+}
+
+@keyframes cal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 860px) {
+  .menu-grupo {
+    display: none;
+  }
+
+  .menu-cuerpo {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0;
+  }
+
+  .menu-bloque {
+    display: contents;
+  }
+
+  .menu-cuerpo .lista,
+  .lista-salir {
+    flex-direction: row;
+    width: auto;
+    margin-top: 0;
+    border-top: none;
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .lista-salir {
+    margin-left: auto;
+  }
+
+  .menu-cuerpo .lista > li:last-child {
+    margin-left: 0;
+  }
+
+  .elemento:hover {
+    transform: none;
+  }
+
+  body.auth {
+    padding: 0;
+    display: block;
+  }
+
+  body.auth .registro {
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ---------- Barra superior ---------- */
+body.app {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  padding-bottom: 0;
+}
+
+.menu {
+  position: sticky;
+  top: 0;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  height: auto;
+  min-height: 64px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 10px 28px rgba(16, 36, 52, 0.05);
+  backdrop-filter: blur(16px);
+  z-index: 60;
+}
+
+.logo {
+  display: flex !important;
+  margin: 0;
+  padding: 8px 8px 8px 0;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+
+.logo .oculto {
+  color: var(--ink);
+}
+
+.menu-cuerpo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  gap: 6px;
+  padding: 8px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.menu-cuerpo::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-bloque {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.menu-bloque + .menu-bloque {
+  margin-top: 0;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+}
+
+.menu-grupo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.menu-cuerpo .lista,
+.lista,
+.lista-salir {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: none;
+  flex: 0 0 auto;
+}
+
+.lista > li,
+.lista > li:last-child {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.lista-salir {
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+
+.elemento {
+  flex-direction: row;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  box-shadow: none;
+}
+
+.elemento .oculto {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.elemento svg {
+  width: 18px;
+  height: 18px;
+}
+
+.elemento:hover {
+  transform: none;
+  background: var(--field);
+  color: var(--ink);
+}
+
+.elemento.activo {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(23, 48, 65, 0.18);
+}
+
+.elemento:hover svg,
+.elemento.activo svg {
+  color: currentColor;
+}
+
+#logout.elemento:hover {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.topbar {
+  top: 64px;
+}
+
+.app-main {
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  body.app {
+    padding-bottom: 0;
+  }
+
+  .logo .oculto {
+    display: none;
+  }
+
+  .elemento {
+    padding: 8px 10px;
+  }
+
+  .topbar {
+    top: 56px;
+    padding: 0 16px;
+  }
+}
+
+/* ---------- Modo oscuro y ancho útil ---------- */
+html {
+  color-scheme: dark;
+  --ink: #e7eef4;
+  --ink-2: #d5e0e8;
+  --ink-3: #b7c6d3;
+  --steel: #e08a4a;
+  --steel-2: #f0b27a;
+  --steel-dim: rgba(224, 138, 74, 0.18);
+  --paper: #101820;
+  --panel: #1a2632;
+  --line: #2c3d4c;
+  --line-strong: #3d5366;
+  --muted: #93a6b6;
+  --text: #e7eef4;
+  --ok: #8ed4a8;
+  --ok-bg: #163528;
+  --warn: #e6c07b;
+  --warn-bg: #3a2e14;
+  --bad: #f0b0ac;
+  --bad-bg: #3d1e1e;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 16px 36px rgba(0, 0, 0, 0.28);
+  --field: #14202b;
+  --nav: #0c141c;
+  --btn: #e08a4a;
+  --btn-hover: #c96f32;
+  --on-btn: #1c120c;
+}
+
+html body,
+html body.app {
+  background: var(--paper);
+  color: var(--text);
+}
+
+html .menu {
+  background: #121c26;
+  color: var(--text);
+  border-bottom-color: var(--line);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+html .logo .oculto,
+html .topbar-title {
+  color: var(--text);
+}
+
+html .elemento {
+  color: #9aafbf;
+}
+
+html .elemento:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+html .elemento.activo,
+html .reserr,
+html .reserrr,
+html .reserrrr,
+html .contenido_ter button,
+html .actualizar_datos button,
+html .perfil button,
+html #comun,
+html .boton_aumentar,
+html .cuenta-btn-primary,
+html .swal2-confirm,
+html .cj-swal-confirm,
+html .avatar,
+html .inicial_usuario,
+html .incial_usuario,
+html .volver:hover {
+  background: var(--btn) !important;
+  color: var(--on-btn) !important;
+  border-color: var(--btn) !important;
+}
+
+html .topbar {
+  background: rgba(16, 24, 32, 0.92);
+}
+
+html .campos,
+html body.auth {
+  background: #0e1620;
+}
+
+html body.auth .campos {
+  background: var(--panel);
+}
+
+html .swal2-popup,
+html .swal2-popup.cj-swal-popup {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+}
+
+.tema-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  margin-left: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--field);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.tema-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tema-btn:hover {
+  border-color: var(--steel);
+  color: var(--steel);
+}
+
+.tema-btn-fijo {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 80;
+}
+
+.cuenta,
+#contenidousuario {
+  max-width: 980px;
+}
+
+.stats-wide canvas,
+.stats-range-charts canvas {
+  min-height: 240px;
 }

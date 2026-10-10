@@ -52,22 +52,13 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
           </div>
           <div class="reserva-card-actions">
             <p id="contadorr-${data.id}" class="estado ${data.estado}"></p>
-            <form id="salio-${data.id}">
-              <button type="submit" class="reserrrr">Salió</button>
-            </form>
-            <form id="pago-${data.id}">
-              <button type="submit" class="reserrrr">Pagar</button>
-            </form>
-            <form id="imprimir-${data.id}">
-              <button type="submit" class="reserrrr">Imprimir</button>
-            </form>
           </div>
         </header>
         <div class="reservas_admin_totales reserva-card-body">
           <div class="prim">
             <div class="fill">
-              <span class="reserva-meta-label">Parqueadero</span>
-              <p class="reserva-meta-value">${data.precio}</p>
+              <span class="reserva-meta-label">Valor</span>
+              <p class="reserva-meta-value">$${data.precio}</p>
             </div>
             <div class="fill">
               <span class="reserva-meta-label">Fecha</span>
@@ -85,9 +76,27 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             </div>
           </div>
         </div>
+        <footer class="reserva-card-actions">
+          <form id="salio-${data.id}">
+            <button type="submit" class="reserrrr">Salió</button>
+          </form>
+          <form id="pago-${data.id}">
+            <button type="submit" class="reserrrr">Pagar</button>
+          </form>
+          <form id="imprimir-${data.id}">
+            <button type="submit" class="reserrrr">Imprimir</button>
+          </form>
+        </footer>
       </article>
             `;
     });
+    if (!html) {
+      html = `
+      <div class="dash-empty">
+        <p class="dash-empty-title">Sin usos comunes</p>
+        <p class="dash-empty-text">No hay ingresos para mostrar en este momento.</p>
+      </div>`;
+    }
     reservasUsuariosContainer.innerHTML = html;
 
     lista.forEach((data) => {
@@ -145,16 +154,16 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         e.preventDefault();
         Swal.fire({
           title: "Agregue el metodo de pago",
-          html: ` <label for="metodoPago">
-            Selecciona el método de pago:
-        </label>
+          html: `<div class="formulario">
+            <label for="metodoPago">Método de pago</label>
         <select id="metodoPago" class="swal2-select">
             <option value="">Seleccione una opción</option>
             <option value="efectivo">Efectivo</option>
             <option value="nequi">Nequi</option>
             <option value="daviplata">Daviplata</option>
             <option value="tarjeta">Tarjeta</option>
-        </select>`,
+        </select>
+        </div>`,
           showCancelButton: true,
           confirmButtonText: "Confirmar Pago",
           cancelButtonText: "Cancelar",

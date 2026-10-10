@@ -59,7 +59,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
      await NotificarUsuario(usuarioAuth.uid, fechahoy, async (data, id)=>{
       const noti = await Swal.fire({
             title: "Se libero un espacio en el parqueadero",
-            html:`<p>Se ha liberado un espacio en el parqueadero</p> <p>horario dsiponible: ${data.horaDisponible} - ${data.horaLimite}</p>`,
+            html:`<p class="dash-sub">Se ha liberado un espacio en el parqueadero.</p><p class="reserva-meta-value">${data.horaDisponible} – ${data.horaLimite}</p>`,
             icon: "info",
             showCancelButton: true,
             confirmButtonText: "Ver",

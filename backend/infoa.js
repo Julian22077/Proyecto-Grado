@@ -29,10 +29,16 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         })
         return;
     }
+        const inicial = String(userData.nombre || "?").charAt(0).toUpperCase();
         adminContainer.innerHTML = `
-      <p class="dash-kicker">Sesión administrativa</p>
-      <h1 class="titu dash-title">Bienvenido, ${userData.nombre}</h1>
-      <p class="dash-sub">Resumen operativo del parqueadero en tiempo real.</p>
+      <header class="cuenta-hero dash-welcome">
+        <div class="avatar" aria-hidden="true">${inicial}</div>
+        <div class="cuenta-hero-text">
+          <p class="dash-kicker">Sesión administrativa</p>
+          <h1 class="titu dash-title">Bienvenido, ${userData.nombre}</h1>
+          <p class="dash-sub">Resumen operativo del parqueadero en tiempo real.</p>
+        </div>
+      </header>
     `;
     
     let dataconfig;
@@ -179,7 +185,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             datasets: [{
                 data: [Math.min(IngreososTotales),
                 Math.max(dataconfig.metaIngreso - IngreososTotales, 0)],
-                backgroundColor: ["#5b8fa8", "#d8e0e8"],
+                backgroundColor: ["#d4894a", "#314556"],
                 borderWidth: 0,
             }]
         },
@@ -200,7 +206,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
                         }
                         return "";
                     },
-                    color: "#ffffff",
+                    color: "#f3eee6",
                     font: {
                         size: 18,
                         weight: "700",
@@ -230,7 +236,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
     ultimas.forEach((data) => {
         if (data.fecha === fechahoy) {
             html2 += `
-      <article class="dos_ultimas">
+      <article class="dos_ultimas reserva-card">
         <header class="reserva-card-head">
           <span class="reserva-badge">Cupo ${data.parqueaderoId}</span>
           <time class="reserva-fecha">${data.fecha}</time>

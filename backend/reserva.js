@@ -148,9 +148,10 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         reservass = espaciosReservados.size;
         const disponibles = total.total - reservass;
          htmlreservas = `
-       <div>
-      <p>Espacios Disponibles: ${disponibles}</p>
-      </div>`
+       <div class="espacio">
+         <span class="reserva-meta-label">Disponibles</span>
+         <span class="reserva-meta-value">${disponibles}</span>
+       </div>`
       containerreser.innerHTML=htmlreservas;
     reservaForm.addEventListener("submit", async (e) => {
         e.preventDefault();

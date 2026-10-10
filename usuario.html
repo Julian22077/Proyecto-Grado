@@ -3,36 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis reservas — Parqueadero CJ</title>
+  <title>Mis reservas — Calatrava</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/icono-calatrava.png">
+  <link rel="apple-touch-icon" href="assets/icono-app.png">
 </head>
 <body class="app">
   <nav class="menu" aria-label="Navegación de usuario">
     <div class="logo">
-      <svg class="icono" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <rect x="4" y="3" width="12" height="18" rx="2"/><path d="M8 8h4M8 12h4M8 16h2"/>
-      </svg>
-      <div class="oculto">Parqueadero CJ</div>
+      <img class="icono" src="assets/icono-calatrava.png" alt="">
+      <div class="oculto">Calatrava</div>
     </div>
-    <ul class="lista">
-      <li>
+    <div class="menu-cuerpo">
+    <section class="menu-bloque">
+      <p class="menu-grupo">Mi espacio</p>
+      <ul class="lista">
+        <li>
         <a href="usuario.html" class="elemento activo">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>
           <div class="oculto">Inicio</div>
         </a>
       </li>
-      <li>
+        <li>
         <a href="reservar.html" class="elemento">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="7.5" cy="15" r="1.5"/><circle cx="16.5" cy="15" r="1.5"/><path d="M3 11h18"/></svg>
           <div class="oculto">Reservar</div>
         </a>
       </li>
-      <li>
+        <li>
         <a href="perfil.html" class="elemento">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/></svg>
           <div class="oculto">Perfil</div>
         </a>
       </li>
+      </ul>
+    </section>
+    </div>
+    <ul class="lista lista-salir">
       <li>
         <a id="logout" class="elemento" href="#">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2"/><path d="M4 12h10M8 8l-4 4 4 4"/></svg>
@@ -61,9 +68,9 @@
   <script type="module" src="./backend/logout.js"></script>
   <div id="pantallaCarga" class="pantalla_carga" aria-hidden="true" role="status">
     <div class="pantalla_carga_caja">
-      <div class="pantalla_carga_anillo" aria-hidden="true"><span class="pantalla_carga_p">CJ</span></div>
+      <div class="pantalla_carga_anillo" aria-hidden="true"><img class="pantalla_carga_icono" src="assets/icono-calatrava.png" alt=""></div>
       <p class="pantalla_carga_texto">Procesando…</p>
-      <p class="pantalla_carga_sub">Parqueadero CJ</p>
+      <p class="pantalla_carga_sub">Calatrava Parqueadero</p>
     </div>
   </div>
   <script src="loader.js"></script>
