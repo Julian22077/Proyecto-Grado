@@ -1,5 +1,19 @@
 import { updateUsusario, auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
     if (!usuarioAuth) {
         usuarioContainer.innerHTML = "<p>No hay sesión iniciada</p>";

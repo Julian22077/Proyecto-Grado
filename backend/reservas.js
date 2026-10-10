@@ -3,7 +3,20 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/f
 
 const reservasUsuariosContainer = document.getElementById("reservasUsuarios");
 const buscador = document.getElementById("buscarReserva");
-
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
   if (!usuarioAuth) {
     reservasUsuariosContainer.innerHTML = "<p>No hay sesión iniciada</p>";
@@ -63,8 +76,8 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         <div class="reservas_admin_totales reserva-card-body">
           <div class="prim">
             <div class="fill">
-              <span class="reserva-meta-label">Parqueadero</span>
-              <p class="reserva-meta-value">${data.parqueaderoId}</p>
+              <span class="reserva-meta-label">Costo Adicional</span>
+              <p class="reserva-meta-value">${data.costoAdicional||"-"}</p>
             </div>
             <div class="fill">
               <span class="reserva-meta-label">Fecha</span>
@@ -83,6 +96,10 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             <div class="fill">
               <span class="reserva-meta-label">Salida</span>
               <p class="reserva-meta-value">${data.horaSalida}</p>
+            </div>
+            <div class="fill">
+              <span class="reserva-meta-label">Minutos pasados</span>
+              <p class="reserva-meta-value">${data.minutosPasados||"-"}</p>
             </div>
           </div>
         </div>

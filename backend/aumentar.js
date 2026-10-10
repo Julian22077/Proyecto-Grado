@@ -6,7 +6,20 @@ const infoContainer = document.getElementById("infoForm");
 const reservasContainer = document.getElementById("reservasContainer");
 const reservasContainerMañana = document.getElementById("reservasContainerMañana");
 const cambioContraseña = document.getElementById("CambioContraseña");
-
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
     if (!usuarioAuth) {
         usuarioContainer.innerHTML = "<p>No hay sesión iniciada</p>";
@@ -102,6 +115,21 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
 
     });
     let precio_minuto
+    const usuarios = await fetch("http://localhost:3000/detalleusuario",{
+          method: "GET",
+                headers: {
+                     "Authorization": `Bearer ${token}`
+                },
+    })
+    const userData=await usuarios.json()
+    if(!usuarios.ok){
+        await Swal.fire({
+            title:"Error",
+            text:userData.error,
+            icon:"error"
+        })
+        return;
+    }
     const configg=await fetch("http://localhost:3000/configuracion",{
           method: "GET",
         headers: {
@@ -117,7 +145,12 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         })
         return 
     }
-    precio_minuto=config;
+     if(/^[A-Z]{3}[0-9]{3}$/.test(userData.placa)){
+         precio_minuto=config.minutosCobro;
+    }
+    if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(userData.placa)){
+         precio_minuto=config.minutosCobroMoto;
+    }
     reservasContainer.innerHTML = html;
     reservas.forEach((data) => {
         const minutis = document.getElementById(`minutosExtra-${data.id}`)
@@ -126,7 +159,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         function numeris() {
             const valor = minutis.value;
             span1.textContent = valor;
-            span2.textContent = valor * precio_minuto.minutosCobro;
+            span2.textContent = valor * precio_minuto;
 
         }
         minutis.addEventListener("change", numeris)

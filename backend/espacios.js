@@ -28,7 +28,20 @@ inputReserva.addEventListener("input", () => {
 });
 const form = document.getElementById("espaciosForm");
 const infoEspacios = document.getElementById("infoespacios");
-
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
 
     const token=await usuarioAuth.getIdToken()
@@ -77,10 +90,25 @@ form.addEventListener("submit", async (e) => {
             })
             return;
         }
-        if (hayreservas) {
+        const asignaciones = await fetch("http://localhost:3000/asignacionesactivas", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+        });
+        const hayasignaciones = await asignaciones.json();
+        if (!asignaciones.ok) {
             await Swal.fire({
                 title: "Error",
-                text: "No puedes modificar espacios si hay reservas activas o pendientes",
+                text: hayasignaciones.error,
+                icon: "error"
+            });
+            return;
+        }
+        if (hayreservas || hayasignaciones) {
+            await Swal.fire({
+                title: "Error",
+                text: "No puedes actualizar los espacios si hay reservas o asignaciones, activas o pendientes",
                 icon: "error",
             });
             return;

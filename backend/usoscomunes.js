@@ -67,7 +67,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
           <div class="prim">
             <div class="fill">
               <span class="reserva-meta-label">Parqueadero</span>
-              <p class="reserva-meta-value">${data.parqueaderoId}</p>
+              <p class="reserva-meta-value">${data.precio}</p>
             </div>
             <div class="fill">
               <span class="reserva-meta-label">Fecha</span>
@@ -127,7 +127,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
           }
           await Swal.fire({
             title: "Uso finalizada",
-            text: "El ususario ha llegado y finalizado su reserva con exito",
+            text: "El ususario ha llegado y finalizado su asignación con exito",
             icon: "success",
           });
           window.location.reload();
@@ -223,8 +223,8 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
           },
           preConfirm: (valor) => {
             const nuevaPlaca = valor.trim().toUpperCase();
-            if (!/^[A-Z]{3}[0-9]{3}$/.test(nuevaPlaca)) {
-              Swal.showValidationMessage("La placa debe tener el formato ABC123");
+            if (!/^[A-Z]{3}[0-9]{3}$/.test(nuevaPlaca)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(nuevaPlaca)) {
+              Swal.showValidationMessage("La placa debe tener el formato ABC123 o ABC12D");
               return false;
             }
 

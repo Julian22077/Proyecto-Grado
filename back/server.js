@@ -198,12 +198,21 @@ app.post("/firma", verficarUsuario, limite, async (req, res) => {
         if (!horaEntrada || !horaSalida) {
             return res.status(400).json({ error: "faltan datos " })
         }
+        const usuario = await db.collection("usuarios").doc(uid).get()
+        const userData = usuario.data()
         const comfiguracion = await db.collection("configuracion").doc("general").get()
         const minuto = comfiguracion.data();
         const entrada = convertirHora(horaEntrada)
         const salida = convertirHora(horaSalida)
         const diferencia = salida - entrada
-        const diferencia1 = diferencia * minuto.minutosCobro;
+        let precio_minuto;
+        if(/^[A-Z]{3}[0-9]{3}$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobro;
+        }
+        if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobroMoto;
+        }
+        const diferencia1 = diferencia * precio_minuto;
         const monto = diferencia1 * 100;
         const moneda = "COP";
         const refrencia = "RES-" + uid + "-" + Date.now()
@@ -234,11 +243,20 @@ app.post("/hacerreserva", verficarUsuario, limite, async (req, res) => {
             return res.status(400).json({ error: "faltan datos " });
         }
         const comfiguracion = await db.collection("configuracion").doc("general").get()
+        const usuario = await db.collection("usuarios").doc(uid).get()
+        const userData = usuario.data()
         const minuto = comfiguracion.data();
         const entrada = convertirHora(horaEntrada)
         const salida = convertirHora(horaSalida)
         const diferencia = salida - entrada
-        const precio = diferencia * minuto.minutosCobro;
+        let precio_minuto;
+        if(/^[A-Z]{3}[0-9]{3}$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobro;
+        }
+        if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobroMoto;
+        }
+        const precio = diferencia * precio_minuto;
         const montoreal = precio * 100;
         const abre = 8 * 60
         const cierra = 24 * 60
@@ -291,6 +309,7 @@ app.post("/hacerreserva", verficarUsuario, limite, async (req, res) => {
                 horaEntrada,
                 horaSalida,
                 precio,
+                placa: userData.placa,
                 extensionMinutos: false,
                 minutosExtra: 0,
                 HoraSalidaReal: "",
@@ -403,8 +422,17 @@ app.post("/firmaaumento", verficarUsuario, limite, async (req, res) => {
             return res.status(400).json({ error: "Faltan datos" })
         }
         const configuracion = await db.collection("configuracion").doc("general").get()
+        const usuario = await db.collection("usuarios").doc(uid).get()
+        const userData = usuario.data()
         const minuto = configuracion.data();
-        const precio = minutosExtra * minuto.minutosCobro
+        let precio_minuto;
+        if(/^[A-Z]{3}[0-9]{3}$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobro;
+        }
+        if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(userData.placa)){
+             precio_minuto=minuto.minutosCobroMoto;
+        }
+        const precio = minutosExtra * precio_minuto
         const monto = precio * 100;
         const referencia = "RES-" + uid + "-" + Date.now();
         const moneda = "COP"
@@ -508,8 +536,15 @@ app.post("/penalizar", verficarUsuario, limite, async (req, res) => {
             }
             const minutospasados = minutosactuales - salida;
             const minutoscobrables = minutospasados - 5;
+            let preciocostoAdicional
             if (minutospasados > 5) {
-                const costoAdicional = minutoscobrables * infconfig.minutosCobro;
+                if(/^[A-Z]{3}[0-9]{3}$/.test(infodata.placa)){
+                    preciocostoAdicional=infconfig.minutosCobro;
+                }
+                if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(infodata.placa)){
+                    preciocostoAdicional=infconfig.minutosCobroMoto;
+                }
+                const costoAdicional = minutoscobrables * preciocostoAdicional
                 transaccion.update(refreserva, { HoraSalidaReal: minutosAHora(minutosactuales), minutosPasados: minutospasados, costoAdicional: costoAdicional, penalizado: true })
             } else {
                 transaccion.update(refreserva, { HoraSalidaReal: minutosAHora(minutosactuales), penalizado: true, finalizadaAntes: true });
@@ -786,7 +821,14 @@ app.post("/finalizarusocomun", verficarUsuario, limite, async (req, res) => {
             const salida = convertirHoracomun(horaSalida)
             const diferencia = salida - entrada;
             const diferenciainutos = Math.ceil(diferencia / 60);
-            const precio = Math.round(diferenciainutos * infoconfig.minutosCobro);
+            let precio_minuto;
+            if(/^[A-Z]{3}[0-9]{3}$/.test(infocomun.placa)){
+                 precio_minuto=infoconfig.minutosCobro;
+            }
+            if(/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(infocomun.placa)){
+                 precio_minuto=infoconfig.minutosCobroMoto;
+            }
+            const precio = Math.round(diferenciainutos * precio_minuto);
             transaccion.update(refcomun, { horaSalida: horaSalida, precio: precio, estado: "finalizado" })
             return { message: "El usuario salió" }
 
@@ -1011,7 +1053,8 @@ app.get("/reservasvigentes", verficarUsuario, limite, async (req, res) => {
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const reservas = await db.collection("reservas").get()
+        const fechahoy = new Date().toLocaleDateString("sv-SE");
+        const reservas = await db.collection("reservas").where("fecha", "==", fechahoy).get()
         for (const reserva of reservas.docs) {
             const data = reserva.data()
             const estado = obtenerEstado(data.fecha, data.horaEntrada, data.horaSalida, data.finalizadaAntes);
@@ -1032,6 +1075,9 @@ app.post("/crearparqueaderos", verficarUsuario, limite, async (req, res) => {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
         const { espaciosReserva } = req.body
+        if(!Number.isInteger(espaciosReserva)){
+            return res.status(400).json({ error: "El valor debe ser un número entero" })
+        }
         if (!espaciosReserva) {
             return res.status(400).json({ error: "faltan datos" })
         }
@@ -1054,6 +1100,9 @@ app.post("/actualizarparqueaderos", verficarUsuario, limite, async (req, res) =>
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
         const { espaciosReserva } = req.body
+        if(!Number.isInteger(espaciosReserva)){
+            return res.status(400).json({ error: "El valor debe ser un número entero" })
+        }
         if (!espaciosReserva) {
             return res.status(400).json({ error: "faltan datos" })
         }
@@ -1086,19 +1135,28 @@ app.post("/crearconfiguracion", verficarUsuario, limite, async (req, res) => {
         if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
             return res.status(403).json("No posee los permisos para hacer esta accion")
         }
-        const { metaIngreso, metaGeneral, metaReservas, metaUsos, minutosCobro } = req.body
-        if (!metaIngreso || !metaGeneral || !metaReservas || !metaUsos || !minutosCobro) {
+        const { metaIngreso, metaGeneral, metaReservas, metaUsos, minutosCobro, minutosCobroMoto } = req.body
+        if (!metaIngreso || !metaGeneral || !metaReservas || !metaUsos || !minutosCobro || !minutosCobroMoto) {
             return res.status(400).json({ error: "Faltan datos" })
         }
-        if (metaIngreso == 0 || metaGeneral == 0 || metaReservas == 0 || metaUsos == 0 || minutosCobro == 0) {
+        if (metaIngreso == 0 || metaGeneral == 0 || metaReservas == 0 || metaUsos == 0 || minutosCobro == 0 || minutosCobroMoto == 0) {
             return res.status(400).json({ error: "Rellene todos los datos por favor" })
         }
-        if (minutosCobro > 253) {
-            return res.status(400).json({ error: "El minuto por cobor no debe superar los 253 pesos" })
+        if (minutosCobro > 230) {
+            return res.status(400).json({ error: "El minuto por cobor no debe superar los 230 pesos" })
+        }
+        if (minutosCobroMoto > 161) {
+            return res.status(400).json({ error: "El minuto por cobor para motos no debe superar los 161 pesos" })
+        }
+        if( metaIngreso < 0 || metaGeneral < 0 || metaReservas < 0 || metaUsos < 0 || minutosCobro < 0 || minutosCobroMoto < 0){
+            return res.status(400).json({ error: "Los valores no pueden ser negativos" })
+        }
+        if(!Number.isInteger(metaIngreso) || !Number.isInteger(metaGeneral) || !Number.isInteger(metaReservas) || !Number.isInteger(metaUsos) || !Number.isInteger(minutosCobro) || !Number.isInteger(minutosCobroMoto)){
+            return res.status(400).json({ error: "Los valores deben ser enteros" })
         }
         const ahora = new Date();
         const fechaConfigurado = ahora.toLocaleDateString("sv-SE");
-        await db.collection("configuracion").doc("general").set({ metaIngreso, metaGeneral, metaReservas, metaUsos, minutosCobro, fechaConfigurado })
+        await db.collection("configuracion").doc("general").set({ metaIngreso, metaGeneral, metaReservas, metaUsos, minutosCobro, minutosCobroMoto, fechaConfigurado })
         return res.json({ message: "configuarcion guardada con exito" })
     } catch (error) {
         return res.status(500).json({ error: error.message })
@@ -1187,6 +1245,9 @@ app.post("/detectar", verficarUsuario, upload.single("imagen"), async (req, res)
         formData.append("file", new Blob([req.file.buffer]), req.file.originalname)
         const respuesta = await fetch("https://familia-tp410ua.tail727a50.ts.net/detectar", {
             method: "POST",
+            headers: {
+                "X-API-Key": process.env.OCR_API_KEY
+            },
             body: formData
         })
         if (!respuesta.ok) {
@@ -1209,7 +1270,8 @@ app.post("/detectar", verficarUsuario, upload.single("imagen"), async (req, res)
             if (parqueaderosSnapshot.empty) {
                 throw new Error("No hay parqueaderos comunes");
             }
-            const usosQuery = db.collection("usocomun").where("estado", "==", "activo");
+            const fechaa = new Date().toLocaleDateString("sv-SE");
+            const usosQuery = db.collection("usocomun").where("estado", "==", "activo").where("fecha", "==", fechaa);
 
             const usosSnapshot = await transaccion.get(usosQuery);
             for (const uso of usosSnapshot.docs) {
@@ -1265,11 +1327,19 @@ app.put("/actualizarplaca", verficarUsuario, async (req, res) => {
             return res.status(400).json({ error: "Faltan datos"});
         }
         const nuevaPlaca = placa.trim().toUpperCase();
-        if (!/^[A-Z]{3}[0-9]{3}$/.test(nuevaPlaca)) {
+        if (!/^[A-Z]{3}[0-9]{3}$/.test(nuevaPlaca)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(nuevaPlaca)) {
             return res.status(400).json({error: "La placa no tiene un formato valido"});
         }
         const referencia = db.collection("usocomun").doc(comunId);
         const documento = await referencia.get();
+        const fechahoy = new Date().toLocaleDateString("sv-SE");
+        const usos= await db.collection("usocomun").where("estado", "==", "activo").where("fecha", "==", fechahoy).get();
+        for(const uso of usos.docs){
+            const data = uso.data();
+            if(data.placa===nuevaPlaca){
+                return res.status(400).json({error: "La placa ya tiene una asignación activa"});
+            }
+        }
         if (!documento.exists) {
             return res.status(404).json({error: "El uso común no existe"});
         }
@@ -1286,6 +1356,27 @@ app.put("/actualizarplaca", verficarUsuario, async (req, res) => {
         return res.status(500).json({error: error.message});
     }
 });
+app.get("/asignacionesactivas", verficarUsuario, limite, async (req, res) => {
+    try{
+        const email = req.email
+        if (email !== "julian.lozanoh@uniagustiniana.edu.co") {
+            return res.status(403).json({error: "No posee los permisos para hacer esta accion"});
+        }
+        const fechahoy= new Date().toLocaleDateString("sv-SE");
+        const asignaciones = await db.collection("usocomun").where("fecha", "==", fechahoy).get();
+        for(const asignacion of asignaciones.docs){
+            const data = asignacion.data();
+            if(data.estado==="activo"){
+                return res.json(true);
+            }
+        }
+        return res.json(false);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({error: error.message});
+    }
+})
 app.listen(3000, () => {
     console.log("corriendo en el puerto")
 })

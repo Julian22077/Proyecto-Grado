@@ -3,6 +3,20 @@ import {auth} from "./firebase.js"
 const video = document.getElementById("camara");
 const canvas = document.getElementById("canvas");
 const resultado = document.getElementById("resultado");
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 function mostrarEstado(texto, tipo) {
     if (!resultado) return;
     resultado.className = "escaneo-status" + (tipo ? " escaneo-status--" + tipo : "");

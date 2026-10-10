@@ -1,5 +1,19 @@
 import { addUsuario } from "./firebase.js";
 const registroForm = document.getElementById("registroForm");
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 registroForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -9,6 +23,14 @@ registroForm.addEventListener("submit", async (e) => {
   const cedula = registroForm["cedula"];
   const placa = registroForm["placa"];
   const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_\\-])[A-Za-z\d@$!%*?&.#_-]{8,30}$/;
+  if (!/^[A-Z]{3}[0-9]{3}$/.test(placa.value)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(placa.value)) {
+    await Swal.fire({
+      title: "Error",
+      text: "La placa debe tener el formato ABC123 o ABC12D",
+      icon: "error"
+    });
+    return;
+  }
   if(!nombre?.value.trim() || !correo?.value.trim() || !contrasena?.value.trim() || !cedula?.value.trim() || !placa?.value.trim()){
         await Swal.fire({
             title: "Error",

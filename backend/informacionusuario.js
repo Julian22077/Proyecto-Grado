@@ -4,6 +4,20 @@ const parametros= new URLSearchParams(window.location.search)
 const id= parametros.get("id")
 const containerusuario=document.getElementById("contenidousuario")
 let html=""
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
        if (!usuarioAuth) {
     reservasUsuariosContainer.innerHTML = "<p>No hay sesión iniciada</p>";

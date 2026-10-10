@@ -273,6 +273,7 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
     })
     html_usos = `<a class="kpi-link" href="usoscomunes.html"><span class="kpi-num">${us}</span></a>`
     general_usos.innerHTML = html_usos
+    const espaciosReservados = new Set();
     reservas.forEach((data) => {
         const estado = obtenerEstado(
             data.fecha,
@@ -281,11 +282,12 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             data.finalizadaAntes
         );
         if (estado === "pendiente" || estado === "activa") {
-            reservass++;
+             espaciosReservados.add(data.parqueaderoId);
         }
         reser++;
 
     })
+    reservass = espaciosReservados.size;
     const disponibles = total.total - (reservass + usoss);
     html3 = `<span class="kpi-num">${disponibles}</span>`
     html_reservas = `<a class="kpi-link" href="reservas.html"><span class="kpi-num">${reser}</span></a>`

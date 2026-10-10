@@ -32,6 +32,13 @@ export const addUsuario = async (nombre, correo, contraseña, cedula, placa) => 
     if(!nombre?.trim() || !correo?.trim() || !contraseña?.trim() || !cedula?.trim() || !placa?.trim()){
         throw new Error("Todos los campos son obligatorios");
     }
+    if (!/^[A-Z]{3}[0-9]{3}$/.test(placa)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(placa)) {
+        throw new Error("La placa debe tener el formato ABC123 o ABC12D");
+    }
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,30}$/;
+    if (!regexPassword.test(contraseña)) {
+        throw new Error("La contraseña debe tener entre 8 y 30 caracteres e incluir una mayúscula, una minúscula, un número y un carácter especial.");
+    }
     const userCredential = await createUserWithEmailAndPassword(auth, correo, contraseña);
     const user = userCredential.user;
     await updateProfile(user, { displayName: nombre });
@@ -47,6 +54,12 @@ export const logoutUsuario = async () => {
     await signOut(auth);
 };
 export const updateUsusario = async (uid, newFields) => {
+    if(!newFields.nombre?.trim() || !newFields.cedula?.trim() || !newFields.placa?.trim()){
+        throw new Error("Todos los campos son obligatorios");
+    }
+    if (!/^[A-Z]{3}[0-9]{3}$/.test(newFields.placa)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(newFields.placa)) {
+        throw new Error("La placa debe tener el formato ABC123 o ABC12D");
+    }
     await updateProfile(auth.currentUser, { displayName: newFields.nombre });
     await updateDoc(doc(db, "usuarios", uid), newFields);
 };
@@ -75,6 +88,10 @@ export const obtenerEstado = (fecha, horaEntrada, horaSalida, finalizadaAntes) =
 }
 export const cambiarContraseña = async (contraseñaActual, nuevaContraseña) => {
     const usuario = auth.currentUser;
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,30}$/;
+    if (!regexPassword.test(nuevaContraseña)) {
+        throw new Error("La contraseña debe tener entre 8 y 30 caracteres e incluir una mayúscula, una minúscula, un número y un carácter especial.");
+    }
     const credential = EmailAuthProvider.credential(usuario.email, contraseñaActual);
     await reauthenticateWithCredential(usuario, credential);
     await updatePassword(usuario, nuevaContraseña);

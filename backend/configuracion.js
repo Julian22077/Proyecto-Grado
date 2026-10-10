@@ -1,5 +1,19 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+window.addEventListener("offline",()=>{
+        Swal.fire({
+            title: "Error",
+            text: "No hay conexión a internet, los servcios no estarán disponibles, revise su conexión y vuelva a intentarlo",
+            icon: "error"
+        });
+    })
+    window.addEventListener("online",()=>{
+        Swal.fire({
+            title: "Conexión restablecida",
+            text: "Se ha restablecido la conexión a internet",
+            icon: "success"
+        });
+    })
 onAuthStateChanged(auth, async (usuarioAuth) => {
  const token=await usuarioAuth.getIdToken()
 const form = document.getElementById("config")
@@ -10,6 +24,7 @@ form.addEventListener("submit", async (e) => {
     const minutoCobro = Number(document.getElementById("minutoCobro").value)
     const metaReservas = Number(document.getElementById("metareservas").value)
     const metaUsos = Number(document.getElementById("metausos").value)
+    const minutoCobroMoto = Number(document.getElementById("minutoCobroMoto").value)
     const ahora = new Date();
     const fehahoy = ahora.toLocaleDateString("sv-SE")
     const vigencia = await fetch("http://localhost:3000/reservasvigentes",{
@@ -25,6 +40,21 @@ form.addEventListener("submit", async (e) => {
                 text:hay.error,
                 icon:"error"
             })
+            return;
+        }
+    const asignaciones = await fetch("http://localhost:3000/asignacionesactivas", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+        });
+        const hayasignaciones = await asignaciones.json();
+        if (!asignaciones.ok) {
+            await Swal.fire({
+                title: "Error",
+                text: hayasignaciones.error,
+                icon: "error"
+            });
             return;
         }
     let dataconfig;
@@ -46,10 +76,10 @@ form.addEventListener("submit", async (e) => {
     }
     dataconfig=config;
     
-    if(hay){
+    if(hay || hayasignaciones){
          await Swal.fire({
             title: "Error",
-            text: "No se pueden configurar si hay reservas pendientes o activas ",
+            text: "No se pueden configurar si hay asignaciones o reservas, pendientes o activas ",
             icon: "error",
         });
         return;
@@ -71,7 +101,7 @@ form.addEventListener("submit", async (e) => {
         return;
     }
     try {
-        if (metaingresos === 0 || metageneral === 0 || minutoCobro === 0||metageneral===0||metaUsos===0) {
+        if (metaingresos === 0 || metageneral === 0 || minutoCobro === 0||metageneral===0||metaUsos===0 || minutoCobroMoto===0) {
             await Swal.fire({
                 title: "Error",
                 text: "Por favor rellene los de espacios a configurar",
@@ -84,7 +114,7 @@ form.addEventListener("submit", async (e) => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         },
-        body:JSON.stringify({metaIngreso:metaingresos, metaGeneral:metageneral, metaReservas:metaReservas, metaUsos:metaUsos, minutosCobro:minutoCobro})
+        body:JSON.stringify({metaIngreso:metaingresos, metaGeneral:metageneral, metaReservas:metaReservas, metaUsos:metaUsos, minutosCobro:minutoCobro, minutosCobroMoto:minutoCobroMoto})
             })
             const configuracioncreada=await crearconfig.json()
             if(!crearconfig.ok){
