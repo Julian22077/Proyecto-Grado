@@ -55,7 +55,33 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
         }); 
         return;
         }
-        await updateUsusario(usuarioAuth.uid, { nombre, cedula, placa });
+        if(!nombre?.trim() || !cedula?.trim() || !placa?.trim()){
+            await Swal.fire({
+            title: "error",
+            text: "Todos los campos son obligatorios",
+            icon: "error",
+        }); 
+        return;
+        }
+        if(!/^[A-Z]{3}[0-9]{3}$/.test(placa)&&!/^[A-Z]{3}[0-9]{2}[A-Z]$/.test(placa)){
+            await Swal.fire({
+            title: "error",
+            text: "La placa debe tener el formato ABC123 o ABC12D",
+            icon: "error",
+        }); 
+        return;
+        }
+        try{
+             await updateUsusario(usuarioAuth.uid, { nombre, cedula, placa });
+        }catch(error){
+            await Swal.fire({
+            title: "Error",
+            text: error.message,
+            icon: "error",
+        });
+        return;
+        }
+       
         await Swal.fire({
             title: "Información Actualizada con exito",
             text: "Su información ha sido actualizada",

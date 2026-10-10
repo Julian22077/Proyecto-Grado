@@ -92,6 +92,12 @@ export const cambiarContraseña = async (contraseñaActual, nuevaContraseña) =>
     if (!regexPassword.test(nuevaContraseña)) {
         throw new Error("La contraseña debe tener entre 8 y 30 caracteres e incluir una mayúscula, una minúscula, un número y un carácter especial.");
     }
+    if(!contraseñaActual?.trim() || !nuevaContraseña?.trim()){
+        throw new Error("Todos los campos son obligatorios");
+    }
+    if(contraseñaActual === nuevaContraseña){
+        throw new Error("La nueva contraseña no puede ser igual a la actual");
+    }
     const credential = EmailAuthProvider.credential(usuario.email, contraseñaActual);
     await reauthenticateWithCredential(usuario, credential);
     await updatePassword(usuario, nuevaContraseña);

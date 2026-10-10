@@ -37,6 +37,22 @@ onAuthStateChanged(auth, async (usuarioAuth) => {
             });
             return;
         }
+        if(!actual?.trim() || !nueva?.trim() || !confirmar?.trim()){
+            await Swal.fire({
+                icon: "error",
+                title: "Campos vacíos",
+                text: "Todos los campos son obligatorios."
+            });
+            return;
+        }
+        if(actual === nueva){
+            await Swal.fire({
+                icon: "error",
+                title: "Contraseña inválida",
+                text: "La nueva contraseña no puede ser igual a la actual."
+            });
+            return;
+        }
         if (confirmar !== nueva) {
             await Swal.fire({
                 icon: "error",
